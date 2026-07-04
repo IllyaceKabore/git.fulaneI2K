@@ -16,9 +16,15 @@ L'application communique avec un **backend Laravel** exposant une **API REST**, 
 
 ## 👥 Membres du groupe
 
-Nom complet, Rôle ou Contribution principale, Contact
-KABORE MAMOUNATA, N03827320232, Développement Backend (API Laravel), mamounatakabore770@gmail.com
-KABORE ILLYACE, E04923520221, Développement Mobile (Android), illyace2kabore@gmail.com
+Nom complet: KABORE MAMOUNATA,
+Matricule: N03827320232,
+Rôle ou Contribution principale: Développement BaAPckend (Laravel),
+Contact: mamounatakabore770@gmail.com
+
+Nom complet: KABORE ILLYACE, 
+Matricule: E04923520221, 
+Rôle ou Contribution principale: Développement Mobile (Android), 
+Contact: illyace2kabore@gmail.com
 
 ---
 
