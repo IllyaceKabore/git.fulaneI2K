@@ -152,8 +152,8 @@ suivi-scolaire-parent-enfant/
 
 1. **Cloner le dépôt**
 ```bash
-git clone https://github.com/IllyaceKabore/git.fulaneI2K/projet-suivi-scolaire.git
-cd projet-suivi-scolaire
+git clone https://github.com/IllyaceKabore/git.fulaneI2K.git
+cd  Suivi Scolaire Parent-Enfant
 ```
 
 2. **Installer les dépendances PHP**
