@@ -30,9 +30,9 @@ interface ApiService {
     @GET("eleves/{id}/absences")
     suspend fun getAbsences(@Path("id") id: Int): Response<AbsencesResponse>
 
-    @GET("notifications")
-    suspend fun getNotifications(): Response<NotificationsResponse>
+    @GET("annonces")
+    suspend fun getAnnonces(): Response<List<NotificationModel>>
+    @POST("auth/mot-de-passe-oublie")
+    suspend fun demanderReinitialisation(@Body email: Map<String, String>): Response<Unit>
 
-    @PUT("notifications/{id}/lire")
-    suspend fun marquerNotificationLue(@Path("id") id: String): Response<Unit>
 }

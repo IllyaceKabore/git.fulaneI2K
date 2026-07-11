@@ -19,12 +19,7 @@ class MainActivity : ComponentActivity() {
         val token     = runBlocking { dataStore.token.first() }
         val eleveId   = runBlocking { dataStore.lastEleveId.first() }
 
-        val start = if (token != null && eleveId != null) {
-            Screen.Dashboard.build(eleveId)
-        } else {
-            Screen.Login.route
-        }
-
+        val start = Screen.Login.route
         setContent {
             SchoolConnectTheme {
                 val navController = rememberNavController()

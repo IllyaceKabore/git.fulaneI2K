@@ -1,19 +1,21 @@
 package com.illyace2k.school_connect.ui.screens.notifications
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +26,13 @@ import com.illyace2k.school_connect.data.model.NotificationModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsScreen(
+    eleveId: Int,
     onBack: () -> Unit,
+    onNavigateToNotes: (Int) -> Unit,
+    onNavigateToAbsences: (Int) -> Unit,
+    onNavigateToPaiements: (Int) -> Unit,
+    onNavigateToNotifications: (Int) -> Unit,
+    onNavigateToDashboard: (Int) -> Unit,
     viewModel: NotificationsViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
@@ -32,6 +40,7 @@ fun NotificationsScreen(
     }
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeId = if (state.currentEleveId != 0) state.currentEleveId else eleveId
 
     Scaffold(
         topBar = {
@@ -43,6 +52,23 @@ fun NotificationsScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomAppBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
+                // Composant pour les icônes du bas
+                @Composable
+                fun NavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+                    Column(Modifier.weight(1f).clickable { onClick() }, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(icon, label, tint = MaterialTheme.colorScheme.primary)
+                        Text(label, fontSize = 10.sp)
+                    }
+                }
+                NavItem(Icons.Default.Home, "Accueil") { onNavigateToDashboard(activeId) }
+                NavItem(Icons.AutoMirrored.Filled.List, "Notes") { onNavigateToNotes(activeId) }
+                NavItem(Icons.Default.DateRange, "Absence") { onNavigateToAbsences(activeId) }
+                NavItem(Icons.Default.Payment, "Paiement") { onNavigateToPaiements(activeId) }
+                NavItem(Icons.Default.Notifications, "Notifications") { onNavigateToNotifications(activeId) }
+            }
         }
     ) { padding ->
         Box(
@@ -56,7 +82,10 @@ fun NotificationsScreen(
             } else if (state.error != null) {
                 Text(text = state.error!!, color = MaterialTheme.colorScheme.error)
             } else if (state.notifications.isEmpty()) {
-                Text(text = "Aucune notification reçue.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
+                Text(
+                    text = "Aucune notification reçue.",
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -67,7 +96,7 @@ fun NotificationsScreen(
                     items(state.notifications) { itemNotification ->
                         NotificationItem(
                             notification = itemNotification,
-                            onClick = { viewModel.marquerCommeLue(itemNotification.id.toString()) } // Converti proprement en String !
+                            onClick = { viewModel.marquerCommeLue(itemNotification.id.toString()) }
                         )
                     }
                 }
@@ -79,70 +108,83 @@ fun NotificationsScreen(
 @Composable
 fun NotificationItem(
     notification: NotificationModel,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    // Une notification est considérée non lue si "luLe" renvoyé par Laravel est null
-    val estNonLue = notification.luLe == null
+    // 🟢 Fonction de nettoyage rapide pour la date ISO (ex: "2026-07-02T10:52:52.000000Z")
+    val dateAffichee = remember(notification.createdAt) {
+        if (!notification.createdAt.isNullOrEmpty() && notification.createdAt.length >= 10) {
+            // Extrait simplement "2026-07-02"
+            val dateBrute = notification.createdAt.substring(0, 10)
+            // Inverse pour l'avoir en format lisible "02/07/2026"
+            val parts = dateBrute.split("-")
+            if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else dateBrute
+        } else {
+            "Date inconnue"
+        }
+    }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clickable { if (estNonLue) onClick() },
-        shape = RoundedCornerShape(12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (estNonLue) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-            else MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (estNonLue) 2.dp else 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement. someOrSpacedBy(12.dp)
+                .padding(16.dp)
         ) {
-            // Petite puce colorée si le message n'est pas lu
-            if (estNonLue) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .padding(top = 4.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+            // Ligne du haut : Badge de Type + Date épurée
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Badge du type d'annonce (ex: PAIEMENT, REUNION...)
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
-                        text = notification.titre,
-                        fontWeight = if (estNonLue) FontWeight.Bold else FontWeight.SemiBold,
-                        fontSize = 15.sp,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = notification.createdAt.take(10), // Affiche uniquement la date YYYY-MM-DD
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        text = (notification.categorie ?: "ANNONCE").uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(6.dp))
+
+                // Date nettoyée
                 Text(
-                    text = notification.contenu,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    lineHeight = 18.sp
+                    text = dateAffichee,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Titre de l'annonce
+            Text(
+                text = notification.titre ?: "Sans titre",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Corps du message (Contenu)
+            Text(
+                text = notification.contenu ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
         }
     }
 }
-
-// Helper rapide pour l'arrangement Compose
-private fun Arrangement.someOrSpacedBy(dp: androidx.compose.ui.unit.Dp) = Arrangement.spacedBy(dp)

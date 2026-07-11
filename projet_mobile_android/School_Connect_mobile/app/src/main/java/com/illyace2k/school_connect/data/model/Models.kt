@@ -13,7 +13,8 @@ data class LoginResponse(
     val status: Boolean,
     val message: String,
     val token: String,
-    val parent: ParentModel?
+    val parent: ParentModel?,
+    val enfants: List<EleveModel>
 )
 
 data class ParentModel(
@@ -48,8 +49,9 @@ data class EleveModel(
     @SerializedName("nom_tuteur") val nomTuteur: String?,
     @SerializedName("telephone_tuteur") val telephoneTuteur: String?,
     @SerializedName("date_inscription") val dateInscription: String?,
-    val photo: String?,
     val classe: ClasseModel? = null
+
+
 )
 
 data class ClasseModel(
@@ -72,7 +74,7 @@ data class NoteModel(
     val note: Double,
     val appreciation: String?,
     val periode: String,
-    val matiere: MatiereModel? = null
+    val matiere: MatiereModel
 )
 
 data class MatiereModel(
@@ -85,7 +87,12 @@ data class MatiereModel(
 
 data class PaiementsResponse(
     val status: Boolean,
-    val paiements: List<PaiementModel>
+    @SerializedName("totalPaye")
+    val totalPaye: Double, // Récupérera dynamiquement la somme des versements (ex: 15000.0)
+
+    @SerializedName("resteAPayer")
+    val resteAPayer: Double, // Récupérera le calcul (frais_scolarite - totalPaye)
+    val paiements: List<PaiementModel> = emptyList()
 )
 
 data class PaiementModel(
@@ -121,9 +128,16 @@ data class NotificationsResponse(
 )
 
 data class NotificationModel(
-    val id: Any, // 🟢 Sécurisé : Accepte Int ou String (UUID) sans broncher
-    val titre: String,
-    val contenu: String,
-    @SerializedName("lu_le") val luLe: String?,
-    @SerializedName("created_at") val createdAt: String
+    val id: Int,
+    val titre: String?,
+    @SerializedName("message")
+    val contenu: String?,
+    @SerializedName("categorie")
+    val categorie: String?,
+    @SerializedName("date_prevue")
+    val datePrevue: String?,
+    @SerializedName("lu_le")
+    val luLe: String?,
+    @SerializedName("created_at")
+    val createdAt: String?
 )

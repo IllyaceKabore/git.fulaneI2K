@@ -2,12 +2,18 @@ package com.illyace2k.school_connect.ui.screens.notes
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +31,11 @@ import com.illyace2k.school_connect.data.model.NoteModel
 fun NotesScreen(
     eleveId: Int,
     onBack: () -> Unit,
+    onNavigateToNotes: (Int) -> Unit,
+    onNavigateToAbsences: (Int) -> Unit,
+    onNavigateToPaiements: (Int) -> Unit,
+    onNavigateToNotifications: (Int) -> Unit,
+    onNavigateToDashboard: (Int) -> Unit,
     viewModel: NotesViewModel = viewModel()
 ) {
     LaunchedEffect(eleveId) {
@@ -32,17 +43,35 @@ fun NotesScreen(
     }
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeId = if (state.currentEleveId != 0) state.currentEleveId else eleveId
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Bulletins de notes", fontWeight = FontWeight.Bold) },
+                title = { Text("Notes", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomAppBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
+                // Composant pour les icônes du bas
+                @Composable
+                fun NavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+                    Column(Modifier.weight(1f).clickable { onClick() }, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(icon, label, tint = MaterialTheme.colorScheme.primary)
+                        Text(label, fontSize = 10.sp)
+                    }
+                }
+                NavItem(Icons.Default.Home, "Accueil") { onNavigateToDashboard(activeId) }
+                NavItem(Icons.AutoMirrored.Filled.List, "Notes") { onNavigateToNotes(activeId) }
+                NavItem(Icons.Default.DateRange, "Absence") { onNavigateToAbsences(activeId) }
+                NavItem(Icons.Default.Payment, "Paiement") { onNavigateToPaiements(activeId) }
+                NavItem(Icons.Default.Notifications, "Notifications") { onNavigateToNotifications(activeId) }
+            }
         }
     ) { padding ->
         Box(
@@ -87,10 +116,10 @@ fun NotesScreen(
                                     color = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = String.format("Moy: %.2f/20", moyennePeriode),
+                                    text = String.format("Moy: %.2f/10", moyennePeriode),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (moyennePeriode >= 10.0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                    color = if (moyennePeriode >= 05.0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                                 )
                             }
                         }
@@ -130,7 +159,7 @@ fun NoteRowItem(note: NoteModel) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = note.matiere?.nom ?: "Matière inconnue",
+                    text = note.matiere.nom?: "Matière inconnue",
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp
                 )
@@ -147,7 +176,7 @@ fun NoteRowItem(note: NoteModel) {
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(
-                        if (note.note >= 10.0) MaterialTheme.colorScheme.primaryContainer
+                        if (note.note >= 05.0) MaterialTheme.colorScheme.primaryContainer
                         else MaterialTheme.colorScheme.errorContainer
                     )
                     .padding(horizontal = 12.dp, vertical = 6.dp)
@@ -155,7 +184,7 @@ fun NoteRowItem(note: NoteModel) {
                 Text(
                     text = String.format("%.1f", note.note),
                     fontWeight = FontWeight.Bold,
-                    color = if (note.note >= 10.0) MaterialTheme.colorScheme.primary
+                    color = if (note.note >= 05.0) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.error
                 )
             }

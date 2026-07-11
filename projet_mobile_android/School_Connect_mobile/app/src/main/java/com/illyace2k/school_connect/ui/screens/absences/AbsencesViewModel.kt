@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 data class AbsencesUiState(
     val isLoading: Boolean = false,
     val absences: List<AbsenceModel> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val currentEleveId: Int = 0
 )
 
 class AbsencesViewModel : ViewModel() {

@@ -13,7 +13,8 @@ data class NotesUiState(
     val isLoading: Boolean = false,
     // On groupe les notes par période (ex: "Trimestre 1" -> Liste de notes)
     val notesParPeriode: Map<String, List<NoteModel>> = emptyMap(),
-    val error: String? = null
+    val error: String? = null,
+    val currentEleveId: Int = 0
 )
 
 class NotesViewModel : ViewModel() {

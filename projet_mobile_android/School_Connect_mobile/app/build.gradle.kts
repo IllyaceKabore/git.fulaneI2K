@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.graphics)
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -65,6 +67,7 @@ dependencies {
 
     implementation(libs.androidx.datastore)
     implementation(libs.coil.compose)
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

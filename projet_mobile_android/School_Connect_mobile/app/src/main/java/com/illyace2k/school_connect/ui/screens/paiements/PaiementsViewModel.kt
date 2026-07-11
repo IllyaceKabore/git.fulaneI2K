@@ -12,7 +12,10 @@ import kotlinx.coroutines.launch
 data class PaiementsUiState(
     val isLoading: Boolean = false,
     val paiements: List<PaiementModel> = emptyList(),
-    val error: String? = null
+    val totalPaye: Double = 0.0,
+    val resteAPayer: Double = 0.0,
+    val error: String? = null,
+    val currentEleveId: Int = 0
 )
 
 class PaiementsViewModel : ViewModel() {
@@ -26,8 +29,21 @@ class PaiementsViewModel : ViewModel() {
             try {
                 val response = ApiManager.service.getPaiements(eleveId)
                 if (response.isSuccessful && response.body()?.status == true) {
-                    val list = response.body()?.paiements ?: emptyList()
-                    _uiState.update { it.copy(isLoading = false, paiements = list) }
+                    val responseBody = response.body()!!
+
+                    val list = responseBody.paiements ?: emptyList()
+                    // ✅ On récupère dynamiquement les montants calculés par Laravel
+                    val total = responseBody.totalPaye
+                    val reste = responseBody.resteAPayer
+
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            paiements = list,
+                            totalPaye = total,     // ✅ Injecté dans le State
+                            resteAPayer = reste    // ✅ Injecté dans le State
+                        )
+                    }
                 } else {
                     _uiState.update { it.copy(isLoading = false, error = "Impossible de récupérer l'historique des paiements.") }
                 }

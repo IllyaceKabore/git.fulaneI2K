@@ -7,8 +7,16 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
+    val apiService: ApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiService::class.java)
+    }
+
     // 10.0.2.2 = localhost depuis l'émulateur Android
-    private const val BASE_URL = "http://10.0.2.2:8000/api/"
+    private const val BASE_URL = "http://localhost:8000/api/"
 
     fun create(token: String? = null): ApiService {
         val client = OkHttpClient.Builder()

@@ -1,12 +1,18 @@
 package com.illyace2k.school_connect.ui.screens.absences
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +30,11 @@ import com.illyace2k.school_connect.data.model.AbsenceModel
 fun AbsencesScreen(
     eleveId: Int,
     onBack: () -> Unit,
+    onNavigateToNotes: (Int) -> Unit,
+    onNavigateToAbsences: (Int) -> Unit,
+    onNavigateToPaiements: (Int) -> Unit,
+    onNavigateToNotifications: (Int) -> Unit,
+    onNavigateToDashboard: (Int) -> Unit,
     viewModel: AbsencesViewModel = viewModel()
 ) {
     LaunchedEffect(eleveId) {
@@ -31,6 +42,7 @@ fun AbsencesScreen(
     }
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val activeId = if (state.currentEleveId != 0) state.currentEleveId else eleveId
 
     Scaffold(
         topBar = {
@@ -45,6 +57,23 @@ fun AbsencesScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            BottomAppBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
+                // Composant pour les icônes du bas
+                @Composable
+                fun NavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+                    Column(Modifier.weight(1f).clickable { onClick() }, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(icon, label, tint = MaterialTheme.colorScheme.primary)
+                        Text(label, fontSize = 10.sp)
+                    }
+                }
+                NavItem(Icons.Default.Home, "Accueil") { onNavigateToDashboard(activeId) }
+                NavItem(Icons.AutoMirrored.Filled.List, "Notes") { onNavigateToNotes(activeId) }
+                NavItem(Icons.Default.DateRange, "Absence") { onNavigateToAbsences(activeId) }
+                NavItem(Icons.Default.Payment, "Paiement") { onNavigateToPaiements(activeId) }
+                NavItem(Icons.Default.Notifications, "Notifications") { onNavigateToNotifications(activeId) }
+            }
         }
     ) { padding ->
         Box(
